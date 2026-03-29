@@ -147,6 +147,23 @@ h1 {
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
+}
+
+.preset-button.is-active {
+  color: #fff;
+  background: linear-gradient(180deg, #4c86d4 0%, #2d66b3 100%);
+  border-color: transparent;
+  box-shadow: 0 8px 20px rgba(45, 102, 179, 0.28);
+}
+
+.preset-button:hover {
+  transform: translateY(-1px);
 }
 
 .field {

@@ -13,6 +13,7 @@ const speedValue = document.querySelector("[data-speed-value]");
 const delayValue = document.querySelector("[data-delay-value]");
 const scaleValue = document.querySelector("[data-scale-value]");
 const codeBlock = document.querySelector("[data-code-preview]");
+let activePreset = "Original";
 
 const PALETTE_PRESETS = {
   Original: { ...DEFAULT_SPRITE_PALETTE },
@@ -102,7 +103,16 @@ function renderCodePreview() {
 function applyPalette(palette) {
   baseConfig.palette = { ...palette };
   follower.updateOptions({ palette: baseConfig.palette });
+  syncPresetButtons();
   renderCodePreview();
+}
+
+function syncPresetButtons() {
+  [...presetGrid.querySelectorAll(".preset-button")].forEach((button) => {
+    const isActive = button.dataset.preset === activePreset;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
 }
 
 function renderPresetButtons() {
@@ -113,9 +123,15 @@ function renderPresetButtons() {
     button.type = "button";
     button.className = "preset-button";
     button.textContent = label;
-    button.addEventListener("click", () => applyPalette(palette));
+    button.dataset.preset = label;
+    button.addEventListener("click", () => {
+      activePreset = label;
+      applyPalette(palette);
+    });
     presetGrid.appendChild(button);
   });
+
+  syncPresetButtons();
 }
 
 form.addEventListener("input", (event) => {
@@ -143,7 +159,9 @@ form.addEventListener("reset", () => {
     baseConfig.delayMs = Number(delayInput.value);
     baseConfig.scale = Number(scaleInput.value);
     baseConfig.palette = { ...DEFAULT_SPRITE_PALETTE };
+    activePreset = "Original";
     follower = mountFollower();
+    syncPresetButtons();
   });
 });
 
