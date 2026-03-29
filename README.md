@@ -8,8 +8,8 @@ This project is a respectful nod to Rob Scanlon's original homepage sprite behav
 
 ## Highlights
 
-- A reusable ES module in [src/index.js](/Users/leeorlandi/Desktop/scanner%20rip%20off/src/index.js)
-- A polished inspiration demo in [demo/index.html](/Users/leeorlandi/Desktop/scanner%20rip%20off/demo/index.html)
+- A reusable ES module in [`src/index.js`](./src/index.js)
+- A polished inspiration demo in [`demo/index.html`](./demo/index.html)
 - Inline live controls for `speed`, `delayMs`, and `scale`
 
 ## Run locally
@@ -98,17 +98,17 @@ createCursorFollowerSprite({
 
 ## Demo
 
-- [demo/index.html](/Users/leeorlandi/Desktop/scanner%20rip%20off/demo/index.html): the shipped demo page with the live control card and code preview
+- [`demo/index.html`](./demo/index.html): the shipped demo page with the live control card and code preview
 
 The demo is the product walkthrough now. It lets you tune the main knobs in place and see the matching config snippet immediately.
 
 ## Project structure
 
-- [src/CursorFollowerSprite.js](/Users/leeorlandi/Desktop/scanner%20rip%20off/src/CursorFollowerSprite.js): core follower behavior
-- [src/defaults.js](/Users/leeorlandi/Desktop/scanner%20rip%20off/src/defaults.js): shared defaults
-- [src/index.js](/Users/leeorlandi/Desktop/scanner%20rip%20off/src/index.js): public entry point and convenience creator
-- [demo/demo.js](/Users/leeorlandi/Desktop/scanner%20rip%20off/demo/demo.js): polished demo bootstrap
-- [demo/styles.css](/Users/leeorlandi/Desktop/scanner%20rip%20off/demo/styles.css): demo presentation layer
+- [`src/CursorFollowerSprite.js`](./src/CursorFollowerSprite.js): core follower behavior
+- [`src/defaults.js`](./src/defaults.js): shared defaults
+- [`src/index.js`](./src/index.js): public entry point and convenience creator
+- [`demo/demo.js`](./demo/demo.js): polished demo bootstrap
+- [`demo/styles.css`](./demo/styles.css): demo presentation layer
 
 ## Cleanup and teardown
 
