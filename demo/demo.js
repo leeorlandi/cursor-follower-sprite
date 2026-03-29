@@ -167,7 +167,6 @@ form.addEventListener("reset", () => {
 
 window.addEventListener("resize", () => {
   baseConfig.spawnX = Math.max(24, window.innerWidth * 0.48);
-  follower = mountFollower();
 });
 
 renderPresetButtons();

@@ -52,6 +52,11 @@ function loadImage(src) {
   return imageCache.get(src);
 }
 
+function isInteractiveTarget(target) {
+  return target instanceof Element
+    && Boolean(target.closest("button, input, select, textarea, label, a"));
+}
+
 async function recolorSprite(spriteUrl, palette) {
   const paletteKey = getPaletteKey(spriteUrl, palette);
   if (recolorCache.has(paletteKey)) {
@@ -120,7 +125,10 @@ export class CursorFollowerSprite {
     this.isMoving = true;
     this.lastTick = performance.now();
     this.lastFrameChange = this.lastTick;
-    this.pointerHandler = this.handlePointerMove.bind(this);
+    this.pointerMoveHandler = this.handlePointerMove.bind(this);
+    this.pointerDownHandler = this.handlePointerDown.bind(this);
+    this.scrollHandler = this.handleViewportChange.bind(this);
+    this.visibilityHandler = this.handleViewportChange.bind(this);
     this.rafId = 0;
     this.startAt = this.lastTick + this.options.delayMs;
     this.isStarted = this.options.delayMs === 0;
@@ -131,13 +139,21 @@ export class CursorFollowerSprite {
   }
 
   mount() {
-    window.addEventListener("pointermove", this.pointerHandler);
+    window.addEventListener("pointermove", this.pointerMoveHandler);
+    window.addEventListener("pointerdown", this.pointerDownHandler);
+    window.addEventListener("scroll", this.scrollHandler, { passive: true });
+    window.addEventListener("resize", this.scrollHandler, { passive: true });
+    document.addEventListener("visibilitychange", this.visibilityHandler);
     this.render();
     this.rafId = window.requestAnimationFrame(this.tick.bind(this));
   }
 
   destroy() {
-    window.removeEventListener("pointermove", this.pointerHandler);
+    window.removeEventListener("pointermove", this.pointerMoveHandler);
+    window.removeEventListener("pointerdown", this.pointerDownHandler);
+    window.removeEventListener("scroll", this.scrollHandler);
+    window.removeEventListener("resize", this.scrollHandler);
+    document.removeEventListener("visibilitychange", this.visibilityHandler);
     window.cancelAnimationFrame(this.rafId);
   }
 
@@ -177,9 +193,31 @@ export class CursorFollowerSprite {
     this.frame = 0;
   }
 
+  setTarget(x, y) {
+    this.target.x = x;
+    this.target.y = y;
+  }
+
   handlePointerMove(event) {
-    this.target.x = event.clientX;
-    this.target.y = event.clientY;
+    if (event.pointerType === "mouse") {
+      this.setTarget(event.clientX, event.clientY);
+    }
+  }
+
+  handlePointerDown(event) {
+    if (isInteractiveTarget(event.target)) {
+      return;
+    }
+
+    if (event.pointerType === "mouse") {
+      return;
+    }
+
+    this.setTarget(event.clientX, event.clientY);
+  }
+
+  handleViewportChange() {
+    this.render();
   }
 
   tick(now) {
@@ -236,16 +274,17 @@ export class CursorFollowerSprite {
     const offsetY = this.direction * this.options.frameHeight;
 
     this.element.style.opacity = this.isStarted ? "1" : "0";
-    this.element.style.transform =
-      `translate(${this.position.x}px, ${this.position.y}px) scale(${this.options.scale})`;
+    this.element.style.left = `${this.position.x}px`;
+    this.element.style.top = `${this.position.y}px`;
+    this.element.style.transform = `scale(${this.options.scale})`;
     this.element.style.backgroundPosition = `-${offsetX}px -${offsetY}px`;
   }
 
   applyElementStyles() {
     this.element.setAttribute("aria-hidden", "true");
     this.element.style.position = "fixed";
-    this.element.style.left = "0";
-    this.element.style.top = "0";
+    this.element.style.left = `${this.position.x}px`;
+    this.element.style.top = `${this.position.y}px`;
     this.element.style.width = `${this.options.frameWidth}px`;
     this.element.style.height = `${this.options.frameHeight}px`;
     this.element.style.pointerEvents = "none";
@@ -253,6 +292,7 @@ export class CursorFollowerSprite {
     this.element.style.imageRendering = "pixelated";
     this.element.style.willChange = "transform, background-position, opacity";
     this.element.style.transformOrigin = "top left";
+    this.element.style.backfaceVisibility = "hidden";
     this.element.style.zIndex = `${this.options.zIndex}`;
 
     this.applyBackgroundImage();
