@@ -2,6 +2,9 @@
 
 A tiny browser-friendly cursor follower sprite you can drop into your own web app as an easter egg.
 
+Live demo:
+- [leeorlandi.github.io/cursor-follower-sprite](https://leeorlandi.github.io/cursor-follower-sprite/)
+
 This project is a respectful nod to Rob Scanlon's original homepage sprite behavior:
 - [Rob Scanlon on GitHub](https://github.com/arscan)
 - [robscanlon.com](https://www.robscanlon.com/)
