@@ -15,6 +15,7 @@ This project is a respectful nod to Rob Scanlon's original homepage sprite behav
 - A polished demo in [`demo/index.html`](./demo/index.html)
 - Inline live controls for `speed`, `delayMs`, `scale`, and color presets
 - Palette-aware sprite recoloring built into the module itself
+- Desktop mouse tracking plus touch-friendly tap targeting
 
 ## Run locally
 
@@ -70,6 +71,12 @@ These are the controls surfaced directly in the demo UI:
 - `delayMs`: how long it waits before appearing
 - `scale`: how large the sprite appears on screen
 - `palette`: a 7-slot palette object used for runtime recoloring
+
+## Input behavior
+
+- On desktop, the sprite tracks live mouse movement.
+- On touch devices, taps act like a cursor target and the sprite walks to the tapped point.
+- Touches on form controls are ignored so sliders and buttons do not accidentally retarget the sprite.
 
 Example:
 
