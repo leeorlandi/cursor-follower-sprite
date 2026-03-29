@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cursor Follower Sprite</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <p class="eyebrow">Cursor Follower Sprite</p>
+        <h1>A tiny pixel easter egg you can drop into your own web app.</h1>
+        <p class="lede">
+          This repo turns the Kings Quest-style cursor follower idea into a small,
+          configurable browser module with a polished demo and a blank config playground.
+        </p>
+        <p class="inspiration">
+          Inspired by Rob Scanlon’s original
+          <a href="https://www.robscanlon.com/" target="_blank" rel="noreferrer">homepage</a>
+          easter egg. GitHub
+          <a href="https://github.com/arscan" target="_blank" rel="noreferrer">here</a>
+          .
+        </p>
+      </section>
+
+      <aside class="config-card">
+        <form class="controls" data-config-form>
+          <label class="field" for="speed">
+            <span>Speed</span>
+            <strong data-speed-value>82</strong>
+            <input id="speed" name="speed" type="range" min="30" max="220" step="1" value="82" />
+          </label>
+
+          <label class="field" for="delayMs">
+            <span>Appear after</span>
+            <strong data-delay-value>1200ms</strong>
+            <input id="delayMs" name="delayMs" type="range" min="0" max="5000" step="100" value="1200" />
+          </label>
+
+          <label class="field" for="scale">
+            <span>Sprite size</span>
+            <strong data-scale-value>1.45x</strong>
+            <input id="scale" name="scale" type="range" min="0.8" max="2.4" step="0.05" value="1.45" />
+          </label>
+
+          <div class="control-actions">
+            <button class="button button-primary" type="reset">Reset defaults</button>
+          </div>
+        </form>
+        <div class="actions">
+          <p class="mini-label">Live config</p>
+          <pre class="code-preview" data-code-preview></pre>
+        </div>
+      </aside>
+    </main>
+
+    <script type="module" src="./demo.js"></script>
+  </body>
+</html>
