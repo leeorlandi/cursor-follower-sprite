@@ -1,7 +1,7 @@
 import {
   DEFAULT_CURSOR_FOLLOWER_OPTIONS,
   DEFAULT_SPRITE_PALETTE,
-} from "./defaults.js";
+} from "./defaults.js?v=20260330-5";
 
 const imageCache = new Map();
 const recolorCache = new Map();
@@ -57,6 +57,15 @@ function isInteractiveTarget(target) {
     && Boolean(target.closest("button, input, select, textarea, label, a"));
 }
 
+function normalizeSmoothnessLevel(value) {
+  const nextLevel = Math.round(Number(value));
+  if (!Number.isFinite(nextLevel)) {
+    return DEFAULT_CURSOR_FOLLOWER_OPTIONS.smoothness;
+  }
+
+  return Math.min(4, Math.max(1, nextLevel));
+}
+
 async function recolorSprite(spriteUrl, palette) {
   const paletteKey = getPaletteKey(spriteUrl, palette);
   if (recolorCache.has(paletteKey)) {
@@ -109,7 +118,13 @@ export class CursorFollowerSprite {
     }
 
     this.element = element;
-    this.options = { ...DEFAULT_CURSOR_FOLLOWER_OPTIONS, ...options };
+    this.options = {
+      ...DEFAULT_CURSOR_FOLLOWER_OPTIONS,
+      ...options,
+      smoothness: normalizeSmoothnessLevel(
+        options.smoothness ?? DEFAULT_CURSOR_FOLLOWER_OPTIONS.smoothness,
+      ),
+    };
 
     if (!this.options.spriteUrl) {
       throw new Error("CursorFollowerSprite requires a spriteUrl option.");
@@ -127,6 +142,8 @@ export class CursorFollowerSprite {
     this.lastFrameChange = this.lastTick;
     this.pointerMoveHandler = this.handlePointerMove.bind(this);
     this.pointerDownHandler = this.handlePointerDown.bind(this);
+    this.touchStartHandler = this.handleTouchStart.bind(this);
+    this.touchEndHandler = this.handleTouchEnd.bind(this);
     this.scrollHandler = this.handleViewportChange.bind(this);
     this.visibilityHandler = this.handleViewportChange.bind(this);
     this.rafId = 0;
@@ -141,6 +158,8 @@ export class CursorFollowerSprite {
   mount() {
     window.addEventListener("pointermove", this.pointerMoveHandler);
     window.addEventListener("pointerdown", this.pointerDownHandler);
+    window.addEventListener("touchstart", this.touchStartHandler, { passive: true });
+    window.addEventListener("touchend", this.touchEndHandler, { passive: true });
     window.addEventListener("scroll", this.scrollHandler, { passive: true });
     window.addEventListener("resize", this.scrollHandler, { passive: true });
     document.addEventListener("visibilitychange", this.visibilityHandler);
@@ -151,6 +170,8 @@ export class CursorFollowerSprite {
   destroy() {
     window.removeEventListener("pointermove", this.pointerMoveHandler);
     window.removeEventListener("pointerdown", this.pointerDownHandler);
+    window.removeEventListener("touchstart", this.touchStartHandler);
+    window.removeEventListener("touchend", this.touchEndHandler);
     window.removeEventListener("scroll", this.scrollHandler);
     window.removeEventListener("resize", this.scrollHandler);
     document.removeEventListener("visibilitychange", this.visibilityHandler);
@@ -167,7 +188,10 @@ export class CursorFollowerSprite {
           : { ...(this.options.palette ?? {}), ...nextOptions.palette };
     }
 
-    this.options = nextMergedOptions;
+    this.options = {
+      ...nextMergedOptions,
+      smoothness: normalizeSmoothnessLevel(nextMergedOptions.smoothness),
+    };
     this.applyElementStyles();
 
     if (
@@ -214,6 +238,32 @@ export class CursorFollowerSprite {
     }
 
     this.setTarget(event.clientX, event.clientY);
+  }
+
+  handleTouchStart(event) {
+    if (isInteractiveTarget(event.target)) {
+      return;
+    }
+
+    const touch = event.touches[0] ?? event.changedTouches[0];
+    if (!touch) {
+      return;
+    }
+
+    this.setTarget(touch.clientX, touch.clientY);
+  }
+
+  handleTouchEnd(event) {
+    if (isInteractiveTarget(event.target)) {
+      return;
+    }
+
+    const touch = event.changedTouches[0] ?? event.touches[0];
+    if (!touch) {
+      return;
+    }
+
+    this.setTarget(touch.clientX, touch.clientY);
   }
 
   handleViewportChange() {
@@ -277,10 +327,21 @@ export class CursorFollowerSprite {
   render() {
     const offsetX = this.frame * this.options.frameWidth;
     const offsetY = this.direction * this.options.frameHeight;
+    const snapSizesBySmoothness = {
+      4: 1,
+      3: 2,
+      2: 3,
+      1: 4,
+    };
+    const snapSize =
+      snapSizesBySmoothness[this.options.smoothness]
+      ?? snapSizesBySmoothness[DEFAULT_CURSOR_FOLLOWER_OPTIONS.smoothness];
+    const renderX = Math.round(this.position.x / snapSize) * snapSize;
+    const renderY = Math.round(this.position.y / snapSize) * snapSize;
 
     this.element.style.opacity = this.isStarted ? "1" : "0";
-    this.element.style.left = `${this.position.x}px`;
-    this.element.style.top = `${this.position.y}px`;
+    this.element.style.left = `${renderX}px`;
+    this.element.style.top = `${renderY}px`;
     this.element.style.transform = `scale(${this.options.scale})`;
     this.element.style.backgroundPosition = `-${offsetX}px -${offsetY}px`;
   }

@@ -14,6 +14,7 @@ export const DEFAULT_CURSOR_FOLLOWER_OPTIONS = {
   frameHeight: 65,
   framesPerDirection: 6,
   frameDuration: 75,
+  smoothness: 4,
   speed: 82,
   stopRadius: 6,
   spawnX: -60,

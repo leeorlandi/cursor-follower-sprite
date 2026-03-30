@@ -13,9 +13,15 @@ This project is a respectful nod to Rob Scanlon's original homepage sprite behav
 
 - A reusable ES module in [`src/index.js`](./src/index.js)
 - A polished demo in [`demo/index.html`](./demo/index.html)
-- Inline live controls for `speed`, `delayMs`, `scale`, and color presets
+- Inline live controls for `speed`, `delayMs`, `scale`, `smoothness`, and color presets
 - Palette-aware sprite recoloring built into the module itself
 - Desktop mouse tracking plus touch-friendly tap targeting
+
+## Release notes
+
+- Added a `smoothness` motion setting with four presets: `Smooth`, `Classic`, `Retro`, and `Chunky`
+- `Smooth` keeps full pixel-by-pixel movement, `Classic` adds light stepping, `Retro` adds more visible snap, and `Chunky` is the most deliberately old-school
+- The demo now exposes smoothness as preset buttons and includes the iOS touch fixes needed to make the follower behave correctly on mobile
 
 ## Run locally
 
@@ -39,6 +45,7 @@ import { createCursorFollowerSprite } from "./src/index.js";
 
 createCursorFollowerSprite({
   spriteUrl: "/sprites/prince.png",
+  smoothness: 4,
   speed: 82,
   scale: 1.45,
   delayMs: 1200,
@@ -55,6 +62,7 @@ document.body.appendChild(element);
 
 const follower = new CursorFollowerSprite(element, {
   spriteUrl: "/sprites/prince.png",
+  smoothness: 4,
   speed: 82,
   scale: 1.45,
   delayMs: 1200,
@@ -70,6 +78,7 @@ These are the controls surfaced directly in the demo UI:
 - `speed`: how quickly the sprite walks toward the cursor
 - `delayMs`: how long it waits before appearing
 - `scale`: how large the sprite appears on screen
+- `smoothness`: how fluid or choppy the rendered motion feels, from `4` (`Smooth`) down to `1` (`Chunky`)
 - `palette`: a 7-slot palette object used for runtime recoloring
 
 ## Input behavior
@@ -83,6 +92,7 @@ Example:
 ```js
 createCursorFollowerSprite({
   spriteUrl: "/sprites/prince.png",
+  smoothness: 2,
   speed: 110,
   scale: 1.75,
   delayMs: 2500,
@@ -133,6 +143,7 @@ createCursorFollowerSprite({
   frameHeight: 65,
   framesPerDirection: 6,
   frameDuration: 75,
+  smoothness: 4,
   speed: 82,
   stopRadius: 6,
   spawnX: -60,

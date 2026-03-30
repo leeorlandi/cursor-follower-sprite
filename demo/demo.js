@@ -2,18 +2,21 @@ import {
   createCursorFollowerSprite,
   DEFAULT_CURSOR_FOLLOWER_OPTIONS,
   DEFAULT_SPRITE_PALETTE,
-} from "../src/index.js";
+} from "../src/index.js?v=20260330-5";
 
 const form = document.querySelector("[data-config-form]");
 const presetGrid = document.querySelector("[data-palette-presets]");
+const smoothnessGrid = document.querySelector("[data-smoothness-presets]");
 const speedInput = document.querySelector("#speed");
 const delayInput = document.querySelector("#delayMs");
 const scaleInput = document.querySelector("#scale");
 const speedValue = document.querySelector("[data-speed-value]");
 const delayValue = document.querySelector("[data-delay-value]");
 const scaleValue = document.querySelector("[data-scale-value]");
+const smoothnessValue = document.querySelector("[data-smoothness-value]");
 const codeBlock = document.querySelector("[data-code-preview]");
 let activePreset = "Original";
+let activeSmoothness = DEFAULT_CURSOR_FOLLOWER_OPTIONS.smoothness;
 
 const PALETTE_PRESETS = {
   Original: { ...DEFAULT_SPRITE_PALETTE },
@@ -55,6 +58,13 @@ const PALETTE_PRESETS = {
   },
 };
 
+const SMOOTHNESS_PRESETS = {
+  Smooth: 4,
+  Classic: 3,
+  Retro: 2,
+  Chunky: 1,
+};
+
 const baseConfig = {
   spriteUrl: "../assets/prince_final.png",
   palette: { ...DEFAULT_SPRITE_PALETTE },
@@ -63,10 +73,10 @@ const baseConfig = {
   spawnY: 72,
   speed: DEFAULT_CURSOR_FOLLOWER_OPTIONS.speed,
   delayMs: 1200,
+  smoothness: DEFAULT_CURSOR_FOLLOWER_OPTIONS.smoothness,
 };
 
 let follower = null;
-follower = mountFollower();
 
 function mountFollower() {
   if (follower) {
@@ -74,17 +84,19 @@ function mountFollower() {
     follower.element.remove();
   }
 
-  const nextFollower = createCursorFollowerSprite(baseConfig);
-  renderCodePreview();
-  return nextFollower;
+  return createCursorFollowerSprite(baseConfig);
 }
 
 function renderCodePreview() {
   speedValue.textContent = `${baseConfig.speed}`;
   delayValue.textContent = `${baseConfig.delayMs}ms`;
   scaleValue.textContent = `${baseConfig.scale.toFixed(2)}x`;
+  smoothnessValue.textContent = Object.entries(SMOOTHNESS_PRESETS).find(
+    ([, value]) => value === baseConfig.smoothness,
+  )?.[0] ?? "Smooth";
   codeBlock.textContent = `createCursorFollowerSprite({
   spriteUrl: "/sprites/prince.png",
+  smoothness: ${baseConfig.smoothness},
   speed: ${baseConfig.speed},
   scale: ${baseConfig.scale.toFixed(2)},
   delayMs: ${baseConfig.delayMs},
@@ -115,6 +127,22 @@ function syncPresetButtons() {
   });
 }
 
+function applySmoothness(level) {
+  baseConfig.smoothness = level;
+  activeSmoothness = level;
+  follower.updateOptions({ smoothness: baseConfig.smoothness });
+  syncSmoothnessButtons();
+  renderCodePreview();
+}
+
+function syncSmoothnessButtons() {
+  [...smoothnessGrid.querySelectorAll(".preset-button")].forEach((button) => {
+    const isActive = Number(button.dataset.smoothness) === activeSmoothness;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
 function renderPresetButtons() {
   presetGrid.innerHTML = "";
 
@@ -132,6 +160,30 @@ function renderPresetButtons() {
   });
 
   syncPresetButtons();
+}
+
+function renderSmoothnessButtons() {
+  smoothnessGrid.innerHTML = "";
+
+  Object.entries(SMOOTHNESS_PRESETS).forEach(([label, level]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "preset-button";
+    if (level === activeSmoothness) {
+      button.classList.add("is-active");
+      button.setAttribute("aria-pressed", "true");
+    } else {
+      button.setAttribute("aria-pressed", "false");
+    }
+    button.textContent = label;
+    button.dataset.smoothness = `${level}`;
+    button.addEventListener("click", () => {
+      applySmoothness(level);
+    });
+    smoothnessGrid.appendChild(button);
+  });
+
+  syncSmoothnessButtons();
 }
 
 form.addEventListener("input", (event) => {
@@ -158,10 +210,13 @@ form.addEventListener("reset", () => {
     baseConfig.speed = Number(speedInput.value);
     baseConfig.delayMs = Number(delayInput.value);
     baseConfig.scale = Number(scaleInput.value);
+    baseConfig.smoothness = DEFAULT_CURSOR_FOLLOWER_OPTIONS.smoothness;
+    activeSmoothness = DEFAULT_CURSOR_FOLLOWER_OPTIONS.smoothness;
     baseConfig.palette = { ...DEFAULT_SPRITE_PALETTE };
     activePreset = "Original";
     follower = mountFollower();
     syncPresetButtons();
+    syncSmoothnessButtons();
   });
 });
 
@@ -170,4 +225,6 @@ window.addEventListener("resize", () => {
 });
 
 renderPresetButtons();
+renderSmoothnessButtons();
+follower = mountFollower();
 renderCodePreview();
