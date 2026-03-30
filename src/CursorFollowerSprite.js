@@ -243,16 +243,21 @@ export class CursorFollowerSprite {
 
     if (this.isMoving) {
       const travel = (this.options.speed * deltaMs) / 1000;
-      const step = Math.min(travel, distance);
-      const unitX = distance === 0 ? 0 : deltaX / distance;
-      const unitY = distance === 0 ? 0 : deltaY / distance;
+      const hasDeltaX = deltaX !== 0;
+      const hasDeltaY = deltaY !== 0;
 
-      this.position.x += unitX * step;
-      this.position.y += unitY * step;
-
-      if (Math.abs(deltaX) >= Math.abs(deltaY)) {
+      if (hasDeltaX && hasDeltaY) {
+        const diagonalStep = Math.min(travel, Math.min(Math.abs(deltaX), Math.abs(deltaY)));
+        this.position.x += Math.sign(deltaX) * diagonalStep;
+        this.position.y += Math.sign(deltaY) * diagonalStep;
+        this.direction = deltaX >= 0 ? 0 : 1;
+      } else if (hasDeltaX) {
+        const stepX = Math.min(travel, Math.abs(deltaX));
+        this.position.x += Math.sign(deltaX) * stepX;
         this.direction = deltaX >= 0 ? 0 : 1;
       } else {
+        const stepY = Math.min(travel, Math.abs(deltaY));
+        this.position.y += Math.sign(deltaY) * stepY;
         this.direction = deltaY >= 0 ? 2 : 3;
       }
 
